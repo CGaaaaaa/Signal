@@ -1,0 +1,10 @@
+{
+  "name": "CGaaaaaa/signal",
+  "version": "0.1.1",
+  "deps": {},
+  "readme": "README.md",
+  "repository": "https://github.com/signal-dev/moonbit-signal",
+  "license": "MIT",
+  "keywords": ["reactive", "signal", "functional", "programming"],
+  "description": "高效的函数式响应编程库 - MoonBit Signal 实现"
+}

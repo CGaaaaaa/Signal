@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup MoonBit
+      uses: moonbitlang/setup-moonbit@v1
+      with:
+        moonbit-version: latest
+    
+    - name: Check formatting
+      run: moon fmt --check
+    
+    - name: Build
+      run: moon build
+    
+    - name: Run tests
+      run: moon test
+    
+    - name: Run benchmarks
+      run: moon bench
+
+  lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup MoonBit  
+      uses: moonbitlang/setup-moonbit@v1
+      with:
+        moonbit-version: latest
+    
+    - name: Check code quality
+      run: moon check
+
+  docs:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup MoonBit
+      uses: moonbitlang/setup-moonbit@v1
+      with:
+        moonbit-version: latest
+    
+    - name: Generate documentation
+      run: moon doc
+    
+    - name: Upload docs
+      uses: actions/upload-artifact@v3
+      with:
+        name: documentation
+        path: target/doc/
