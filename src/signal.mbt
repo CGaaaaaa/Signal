@@ -10,6 +10,7 @@
 // 5. 线程安全（在需要时）
 
 // 用于生成唯一ID的计数器
+
 ///|
 let global_id_counter : Ref[Int] = { val: 0 }
 
@@ -86,18 +87,12 @@ struct WritableSignal[T] {
   id : Int
   value : Ref[T]
   state : Ref[SignalState]
-  observers : Ref[Array[Int]] // 依赖此信号的其他信号ID
 }
 
 ///|
 pub fn[T] WritableSignal::new(initial_value : T) -> WritableSignal[T] {
   let id = next_id()
-  let signal = {
-    id,
-    value: { val: initial_value },
-    state: { val: Fresh },
-    observers: { val: [] },
-  }
+  let signal = { id, value: { val: initial_value }, state: { val: Fresh } }
   signal
 }
 
@@ -146,7 +141,6 @@ struct ComputedSignal[T] {
   state : Ref[SignalState]
   compute_fn : () -> T // 计算函数
   dependencies : Ref[Array[Int]] // 依赖的信号ID
-  observers : Ref[Array[Int]] // 观察者信号ID
 }
 
 ///|
@@ -158,7 +152,6 @@ pub fn[T] ComputedSignal::new(compute_fn : () -> T) -> ComputedSignal[T] {
     state: { val: Stale },
     compute_fn,
     dependencies: { val: [] },
-    observers: { val: [] },
   }
   // 注册到全局注册表
   let new_list = global_computed_signals.val.copy()
@@ -276,11 +269,6 @@ struct Effect {
   state : Ref[SignalState]
   effect_fn : () -> Unit
   dependencies : Ref[Array[Int]]
-}
-
-///|
-impl Eq for Effect with op_equal(self, other) {
-  self.id == other.id
 }
 
 // 销毁副作用，清理资源
@@ -407,17 +395,6 @@ fn track_dependency(signal_id : Int) -> Unit {
   }
 }
 
-// 添加副作用到更新队列
-
-///|
-fn schedule_effect(effect : Effect) -> Unit {
-  if not(is_updating.val) {
-    effect.run()
-  } else if not(update_queue.val.contains(effect)) {
-    update_queue.val.push(effect)
-  }
-}
-
 // 刷新所有待更新的副作用
 
 ///|
@@ -468,7 +445,7 @@ fn notify_observers(signal_id : Int) -> Unit {
 fn notify_observers_immediate(signal_id : Int) -> Unit {
   // 遍历所有计算信号，检查哪些依赖于这个信号
   for i = 0; i < global_computed_signals.val.length(); i = i + 1 {
-    let (computed_id, state_ref) = global_computed_signals.val[i]
+    let (_, state_ref) = global_computed_signals.val[i]
     // 简化版本：将所有计算信号标记为过期
     // 在完整实现中，应该只标记实际依赖此信号的计算信号
     if state_ref.val == Fresh {
@@ -490,9 +467,9 @@ fn notify_observers_immediate(signal_id : Int) -> Unit {
 
 ///|
 fn update_dependencies(
-  signal_id : Int,
-  old_deps : Array[Int],
-  new_deps : Array[Int],
+  _signal_id : Int,
+  _old_deps : Array[Int],
+  _new_deps : Array[Int],
 ) -> Unit {
   // 这个函数现在是空的，因为我们没有实现完整的依赖图管理
   // 在实际使用中，依赖关系通过信号的直接引用来维护
