@@ -68,7 +68,7 @@ struct WritableSignal[T] {
   id : Int
   value : Ref[T]
   state : Ref[SignalState]
-  observers : Ref[Array[Int]]  // 依赖此信号的其他信号ID
+  observers : Ref[Array[Int]]  // 保留供未来的细粒度依赖追踪使用
 }
 
 pub fn[T] WritableSignal::new(initial_value : T) -> WritableSignal[T] {
@@ -115,7 +115,7 @@ struct ComputedSignal[T] {
   state : Ref[SignalState]
   compute_fn : () -> T         // 计算函数
   dependencies : Ref[Array[Int]]  // 依赖的信号ID
-  observers : Ref[Array[Int]]    // 观察者信号ID
+  observers : Ref[Array[Int]]    // 保留供未来的细粒度依赖追踪使用
 }
 
 pub fn[T] ComputedSignal::new(compute_fn : () -> T) -> ComputedSignal[T] {
@@ -242,10 +242,6 @@ struct Effect {
   dependencies : Ref[Array[Int]]
 }
 
-impl Eq for Effect with op_equal(self, other) {
-  self.id == other.id
-}
-
 // 销毁副作用，清理资源
 pub fn Effect::dispose(self : Effect) -> Unit {
   self.state.val = Disposed
@@ -365,16 +361,16 @@ fn track_dependency(signal_id : Int) -> Unit {
   }
 }
 
-// 添加副作用到更新队列
-fn schedule_effect(effect : Effect) -> Unit {
-  if not(is_updating.val) {
-    effect.run()
-  } else {
-    if not(update_queue.val.contains(effect)) {
-      update_queue.val.push(effect)
-    }
-  }
-}
+// 添加副作用到更新队列（保留供未来使用）
+// fn schedule_effect(effect : Effect) -> Unit {
+//   if not(is_updating.val) {
+//     effect.run()
+//   } else {
+//     if not(update_queue.val.contains(effect)) {
+//       update_queue.val.push(effect)
+//     }
+//   }
+// }
 
 // 刷新所有待更新的副作用
 fn flush_updates() -> Unit {
@@ -423,7 +419,7 @@ fn notify_observers(signal_id : Int) -> Unit {
 fn notify_observers_immediate(signal_id : Int) -> Unit {
   // 遍历所有计算信号，检查哪些依赖于这个信号
   for i = 0; i < global_computed_signals.val.length(); i = i + 1 {
-    let (computed_id, state_ref) = global_computed_signals.val[i]
+    let (_id, state_ref) = global_computed_signals.val[i]
     // 简化版本：将所有计算信号标记为过期
     // 在完整实现中，应该只标记实际依赖此信号的计算信号
     if state_ref.val == Fresh {
@@ -440,8 +436,8 @@ fn notify_observers_immediate(signal_id : Int) -> Unit {
   }
 }
 
-// 简化的依赖更新
-fn update_dependencies(signal_id : Int, old_deps : Array[Int], new_deps : Array[Int]) -> Unit {
+// 简化的依赖更新（保留供未来使用）
+fn update_dependencies(_signal_id : Int, _old_deps : Array[Int], _new_deps : Array[Int]) -> Unit {
   // 这个函数现在是空的，因为我们没有实现完整的依赖图管理
   // 在实际使用中，依赖关系通过信号的直接引用来维护
   ()

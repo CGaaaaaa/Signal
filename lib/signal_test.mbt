@@ -56,9 +56,8 @@ test "effect basic functionality" {
   assert_eq(last_value.val, 0)
   
   counter.set(10)
-  // 由于没有实现完整的观察者通知，这个测试暂时跳过
-  // assert_eq(effects_run.val, 2)
-  // assert_eq(last_value.val, 10)
+  assert_eq(effects_run.val, 2)
+  assert_eq(last_value.val, 10)
 }
 
 test "untracked access" {
@@ -82,9 +81,11 @@ test "untracked access" {
   assert_eq(access_count.val, 2)
   
   // 修改b不应该触发重新计算（因为使用了untracked）
+  // 注意：当前实现中，所有计算信号在任何依赖变化时都会被标记为过期
+  // 但由于 b 没有被追踪为依赖，computed_signal 不会自动重新计算
+  // 只有在显式调用 get() 时才会重新计算，并使用当前的 b 值
   b.set(20)
-  // 由于没有实现完整的依赖追踪，这个测试需要手动验证
-  // computed_signal应该仍然是16，除非手动重新计算
+  // computed_signal 的值仍然是缓存的 16，直到下次访问
 }
 
 test "batch updates" {
@@ -110,7 +111,8 @@ test "batch updates" {
   
   // 验证最终结果
   assert_eq(sum.get(), 30)
-  // 由于没有实现完整的批量更新，compute_count可能不是预期的值
+  // 批量更新后，计算信号只会重新计算一次
+  assert_eq(compute_count.val, 2)
 }
 
 test "signal chain" {

@@ -2,15 +2,15 @@
 
 // === 基本用法示例 ===
 
-pub fn example_basic_usage() -> Unit {
+fn example_basic_usage() -> Unit {
   println("=== 基本用法示例 ===")
   
   // 创建可写信号
-  let count = signal(0)
-  let name = signal("Alice")
+  let count = @lib.signal(0)
+  let name = @lib.signal("Alice")
   
   // 创建计算信号
-  let message = computed(fn() {
+  let message = @lib.computed(fn() {
     "\{name.get()} has \{count.get()} items"
   })
   
@@ -26,14 +26,14 @@ pub fn example_basic_usage() -> Unit {
 
 // === 计算器示例 ===
 
-pub fn example_calculator() -> Unit {
+fn example_calculator() -> Unit {
   println("\n=== 计算器示例 ===")
   
-  let a = signal(10)
-  let b = signal(5)
-  let operation = signal("+")
+  let a = @lib.signal(10)
+  let b = @lib.signal(5)
+  let operation = @lib.signal("+")
   
-  let result = computed(fn() {
+  let result = @lib.computed(fn() {
     let op = operation.get()
     let x = a.get()
     let y = b.get()
@@ -58,25 +58,25 @@ pub fn example_calculator() -> Unit {
 
 // === 购物车示例 ===
 
-priv struct Item {
+struct Item {
   name : String
   price : Int
   quantity : Int
 } derive(Eq)
 
-pub fn example_shopping_cart() -> Unit {
+fn example_shopping_cart() -> Unit {
   println("\n=== 购物车示例 ===")
   
-  let items = signal([
+  let items = @lib.signal([
     { name: "苹果", price: 5, quantity: 3 },
     { name: "香蕉", price: 3, quantity: 5 },
     { name: "橙子", price: 4, quantity: 2 }
   ])
   
-  let discount_rate = signal(0)  // 折扣率 (0-100)
+  let discount_rate = @lib.signal(0)  // 折扣率 (0-100)
   
   // 计算总价
-  let subtotal = computed(fn() {
+  let subtotal = @lib.computed(fn() {
     let item_list = items.get()
     let mut total = 0
     for item in item_list {
@@ -86,7 +86,7 @@ pub fn example_shopping_cart() -> Unit {
   })
   
   // 计算折扣后价格
-  let total = computed(fn() {
+  let total = @lib.computed(fn() {
     let sub = subtotal.get()
     let discount = discount_rate.get()
     sub - (sub * discount / 100)
@@ -113,19 +113,19 @@ pub fn example_shopping_cart() -> Unit {
 
 // === 状态机示例 ===
 
-priv enum AppState {
+enum AppState {
   Loading
   Ready(String)
   Error(String)
 } derive(Eq)
 
-pub fn example_state_machine() -> Unit {
+fn example_state_machine() -> Unit {
   println("\n=== 状态机示例 ===")
   
-  let current_state = signal(Loading)
+  let current_state = @lib.signal(Loading)
   
   // 根据状态计算UI消息
-  let ui_message = computed(fn() {
+  let ui_message = @lib.computed(fn() {
     match current_state.get() {
       Loading => "正在加载..."
       Ready(data) => "数据已就绪: \{data}"
@@ -134,7 +134,7 @@ pub fn example_state_machine() -> Unit {
   })
   
   // 根据状态计算是否可以执行操作
-  let can_perform_action = computed(fn() {
+  let can_perform_action = @lib.computed(fn() {
     match current_state.get() {
       Ready(_) => true
       _ => false
@@ -156,33 +156,33 @@ pub fn example_state_machine() -> Unit {
 
 // === 表单验证示例 ===
 
-pub fn example_form_validation() -> Unit {
+fn example_form_validation() -> Unit {
   println("\n=== 表单验证示例 ===")
   
-  let username = signal("")
-  let email = signal("")
-  let password = signal("")
+  let username = @lib.signal("")
+  let email = @lib.signal("")
+  let password = @lib.signal("")
   
   // 用户名验证
-  let username_valid = computed(fn() {
+  let username_valid = @lib.computed(fn() {
     let name = username.get()
     name.length() >= 3 && name.length() <= 20
   })
   
   // 邮箱验证（简化版）
-  let email_valid = computed(fn() {
+  let email_valid = @lib.computed(fn() {
     let mail = email.get()
     mail.contains("@") && mail.contains(".")
   })
   
   // 密码验证
-  let password_valid = computed(fn() {
+  let password_valid = @lib.computed(fn() {
     let pwd = password.get()
     pwd.length() >= 6
   })
   
   // 整体表单验证
-  let form_valid = computed(fn() {
+  let form_valid = @lib.computed(fn() {
     username_valid.get() && email_valid.get() && password_valid.get()
   })
   
@@ -208,14 +208,14 @@ pub fn example_form_validation() -> Unit {
 
 // === 计数器与副作用示例 ===
 
-pub fn example_counter_with_effects() -> Unit {
+fn example_counter_with_effects() -> Unit {
   println("\n=== 计数器与副作用示例 ===")
   
-  let counter = signal(0)
+  let counter = @lib.signal(0)
   let log_messages : Ref[Array[String]] = { val: [] }
   
   // 创建副作用来记录计数器变化
-  let _logger = effect(fn() {
+  let _logger = @lib.effect(fn() {
     let count = counter.get()
     let message = "计数器更新为: \{count}"
     log_messages.val.push(message)
@@ -223,7 +223,7 @@ pub fn example_counter_with_effects() -> Unit {
   })
   
   // 创建另一个副作用来检查偶数
-  let _even_checker = effect(fn() {
+  let _even_checker = @lib.effect(fn() {
     let count = counter.get()
     if count % 2 == 0 && count > 0 {
       println("达到偶数: \{count}")
@@ -240,14 +240,14 @@ pub fn example_counter_with_effects() -> Unit {
 
 // === 批量更新示例 ===
 
-pub fn example_batch_updates() -> Unit {
+fn example_batch_updates() -> Unit {
   println("\n=== 批量更新示例 ===")
   
-  let x = signal(1)
-  let y = signal(2)
+  let x = @lib.signal(1)
+  let y = @lib.signal(2)
   let compute_count : Ref[Int] = { val: 0 }
   
-  let sum = computed(fn() {
+  let sum = @lib.computed(fn() {
     compute_count.val = compute_count.val + 1
     let result = x.get() + y.get()
     println("计算和: \{x.get()} + \{y.get()} = \{result}")
@@ -265,7 +265,7 @@ pub fn example_batch_updates() -> Unit {
   
   println("\n使用批量更新:")
   compute_count.val = 0
-  batch(fn() {
+  @lib.batch(fn() {
     x.set(100)
     y.set(200)
     return ()
@@ -276,7 +276,7 @@ pub fn example_batch_updates() -> Unit {
 
 // === 主示例运行函数 ===
 
-pub fn run_all_examples() -> Unit {
+fn main {
   example_basic_usage()
   example_calculator()
   example_shopping_cart()
@@ -285,3 +285,4 @@ pub fn run_all_examples() -> Unit {
   example_counter_with_effects()
   example_batch_updates()
 }
+
