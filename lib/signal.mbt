@@ -68,7 +68,7 @@ struct WritableSignal[T] {
   id : Int
   value : Ref[T]
   state : Ref[SignalState]
-  observers : Ref[Array[Int]]  // 保留供未来的细粒度依赖追踪使用
+  _observers : Ref[Array[Int]]  // 保留供未来的细粒度依赖追踪使用
 }
 
 pub fn[T] WritableSignal::new(initial_value : T) -> WritableSignal[T] {
@@ -77,7 +77,7 @@ pub fn[T] WritableSignal::new(initial_value : T) -> WritableSignal[T] {
     id,
     value: { val: initial_value },
     state: { val: Fresh },
-    observers: { val: [] }
+    _observers: { val: [] }
   }
   signal
 }
@@ -115,7 +115,7 @@ struct ComputedSignal[T] {
   state : Ref[SignalState]
   compute_fn : () -> T         // 计算函数
   dependencies : Ref[Array[Int]]  // 依赖的信号ID
-  observers : Ref[Array[Int]]    // 保留供未来的细粒度依赖追踪使用
+  _observers : Ref[Array[Int]]    // 保留供未来的细粒度依赖追踪使用
 }
 
 pub fn[T] ComputedSignal::new(compute_fn : () -> T) -> ComputedSignal[T] {
@@ -126,7 +126,7 @@ pub fn[T] ComputedSignal::new(compute_fn : () -> T) -> ComputedSignal[T] {
     state: { val: Stale },
     compute_fn,
     dependencies: { val: [] },
-    observers: { val: [] }
+    _observers: { val: [] }
   }
   // 注册到全局注册表
   let new_list = global_computed_signals.val.copy()
