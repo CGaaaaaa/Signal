@@ -3,6 +3,7 @@ target/
 .moon/
 *.wasm
 *.wasm.d.ts
+*.mbti
 
 # Logs
 logs
