@@ -1,0 +1,67 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "CGaaaaaa/signal"
+
+// Values
+fn[T] batch(() -> T) -> T
+
+fn[T] computed(() -> T) -> ComputedSignal[T]
+
+fn debug_info() -> DebugInfo
+
+fn effect(() -> Unit) -> Effect
+
+fn[T] named_signal(String, T) -> NamedSignal[T]
+
+fn[T] read_only(WritableSignal[T]) -> ReadOnlySignal[T]
+
+fn[T] signal(T) -> WritableSignal[T]
+
+fn[T] untracked(() -> T) -> T
+
+// Errors
+
+// Types and methods
+type ComputedSignal[T]
+fn[T : Eq] ComputedSignal::get(Self[T]) -> T
+fn[T] ComputedSignal::new(() -> T) -> Self[T]
+fn[T : Eq] ComputedSignal::peek(Self[T]) -> T
+
+pub struct DebugInfo {
+  signal_count : Int
+  computed_count : Int
+  effect_count : Int
+  is_batching : Bool
+  batch_depth : Int
+  pending_notifications : Int
+}
+
+type Effect
+fn Effect::dispose(Self) -> Unit
+fn Effect::new(() -> Unit) -> Self
+fn Effect::rerun(Self) -> Unit
+
+pub struct NamedSignal[T] {
+  signal : WritableSignal[T]
+  name : String
+}
+fn[T] NamedSignal::get(Self[T]) -> T
+fn[T] NamedSignal::new(String, T) -> Self[T]
+fn[T] NamedSignal::peek(Self[T]) -> T
+fn[T : Eq] NamedSignal::set(Self[T], T) -> Unit
+
+type ReadOnlySignal[T]
+fn[T] ReadOnlySignal::get(Self[T]) -> T
+fn[T] ReadOnlySignal::new(WritableSignal[T]) -> Self[T]
+fn[T] ReadOnlySignal::peek(Self[T]) -> T
+
+type WritableSignal[T]
+fn[T] WritableSignal::get(Self[T]) -> T
+fn[T] WritableSignal::new(T) -> Self[T]
+fn[T] WritableSignal::peek(Self[T]) -> T
+fn[T : Eq] WritableSignal::set(Self[T], T) -> Unit
+fn[T : Eq] WritableSignal::update(Self[T], (T) -> T) -> Unit
+
+// Type aliases
+
+// Traits
+
